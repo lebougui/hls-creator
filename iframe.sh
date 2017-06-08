@@ -223,7 +223,7 @@ case $IFRAME_TYPE in
 					unset IFRAMES_PKT_SIZE
 					unset IFRAMES_PKT_POS
 					unset VIDEO_PACKETS_POS
-                    unset IFRAMES_DATA
+					unset IFRAMES_DATA
 				done
 				echo "#EXT-X-ENDLIST" >> $iframe_playlist_name
 

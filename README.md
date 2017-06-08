@@ -13,6 +13,10 @@ into HTTP Live Streaming in depth, so after reading the [IETF Draft](http://tool
 
 I-FRAME Creator(iframe.sh) is used to generate I-Frame Playlist from existing HLS Playlist.
 
+Pre-requisites
+-------------
+ffmeg must be installed.
+
 
 Usage
 ------
