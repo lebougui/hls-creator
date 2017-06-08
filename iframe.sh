@@ -168,14 +168,14 @@ case $IFRAME_TYPE in
 					declare -a VIDEO_PACKETS_POS
                     			declare -a IFRAMES_DATA
 
-				    	ALL_PACKETS=$(ffprobe -v quiet -show_packets  -show_frames $ts -of compact > $tmp_file)
-				    	VIDEO_PACKETS_POS=($(grep 'packet' $tmp_file | grep 'codec_type=video' | awk 'BEGIN{FS="|"} {for(i=1; i<=NF; i++){if(match($i,"pos")){split($i, tab, "="); print tab[2];}} }'))
+					ALL_PACKETS=$(ffprobe -v quiet -show_packets  -show_frames $ts -of compact > $tmp_file)
+					VIDEO_PACKETS_POS=($(grep 'packet' $tmp_file | grep 'codec_type=video' | awk 'BEGIN{FS="|"} {for(i=1; i<=NF; i++){if(match($i,"pos")){split($i, tab, "="); print tab[2];}} }'))
 
 					IFRAMES_DATA=($(grep 'pict_type=I' $tmp_file | grep 'key_frame=1'))
-	                		if [ ${#IFRAMES_DATA[@]} -eq 0 ]
-                    			then
-                        			continue
-                    			fi
+					if [ ${#IFRAMES_DATA[@]} -eq 0 ]
+					then
+					    continue
+					fi
 					IFRAMES_BEST_EFFORT_TIME=($(echo ${IFRAMES_DATA[@]}  | awk 'BEGIN{FS="|"} {for(i=1; i<=NF; i++){if(match($i,"best_effort_timestamp_time")){split($i, tab, "="); print tab[2];}} }'))
 					IFRAMES_PKT_SIZE=($(echo ${IFRAMES_DATA[@]} | awk 'BEGIN{FS="|"} {for(i=1; i<=NF; i++){if(match($i,"pkt_size")){split($i, tab, "="); print tab[2];}} }'))
 					IFRAMES_PKT_POS=($(echo ${IFRAMES_DATA[@]} | awk 'BEGIN{FS="|"} {for(i=1; i<=NF; i++){if(match($i,"pkt_pos")){split($i, tab, "="); print tab[2];}} }'))         
@@ -194,26 +194,27 @@ case $IFRAME_TYPE in
 						  RESULT=$(echo "$GET_LAST_BEST_EFFORT_TIME - ${IFRAMES_BEST_EFFORT_TIME[$i]}" | bc -l | awk '{printf "%f", $0}')
 						fi
 
-				        	if [ $(echo "($RESULT - $target_duration) > 0" | bc -l) -gt 0 ]
-				        	then
-				            	target_duration=$RESULT
-				        	fi
-				        	echo "#EXTINF:${RESULT}," >> $iframe_playlist_name
-				        	j=0
-				        	size=${IFRAMES_PKT_SIZE[$i]}
-				        	while [ $j -le "$((${#VIDEO_PACKETS_POS[@]}-1))" ]
-				        	do
-				            		if [ $(echo "(${VIDEO_PACKETS_POS[$j]} - ${IFRAMES_PKT_POS[$i]})" | bc -l) -eq 0 ]
-				            		then
-				                	if [ ! -z ${VIDEO_PACKETS_POS[$(($j+1))]} ]
-				                	then
-				                    		size=$(echo "((${VIDEO_PACKETS_POS[$(($j+1))]} - ${VIDEO_PACKETS_POS[$j]}) + 188)" | bc -l)
-				                    		break
-                                			fi
-				            		fi
-							j=$(($j+1))
-				        	done
-				        	echo "#EXT-X-BYTERANGE:$size@${IFRAMES_PKT_POS[$i]}" >> $iframe_playlist_name
+						if [ $(echo "($RESULT - $target_duration) > 0" | bc -l) -gt 0 ]
+						then
+							target_duration=$RESULT
+						fi
+
+						echo "#EXTINF:${RESULT}," >> $iframe_playlist_name
+						j=0
+						size=${IFRAMES_PKT_SIZE[$i]}
+						while [ $j -le "$((${#VIDEO_PACKETS_POS[@]}-1))" ]
+						do
+								if [ $(echo "(${VIDEO_PACKETS_POS[$j]} - ${IFRAMES_PKT_POS[$i]})" | bc -l) -eq 0 ]
+								then
+									if [ ! -z ${VIDEO_PACKETS_POS[$(($j+1))]} ]
+									then
+										size=$(echo "((${VIDEO_PACKETS_POS[$(($j+1))]} - ${VIDEO_PACKETS_POS[$j]}) + 188)" | bc -l)
+										break
+									fi
+								fi
+						j=$(($j+1))
+						done
+				        echo "#EXT-X-BYTERANGE:$size@${IFRAMES_PKT_POS[$i]}" >> $iframe_playlist_name
 
 						echo "$ts" >> $iframe_playlist_name
 						i=$(($i+1))
@@ -222,7 +223,7 @@ case $IFRAME_TYPE in
 					unset IFRAMES_PKT_SIZE
 					unset IFRAMES_PKT_POS
 					unset VIDEO_PACKETS_POS
-                    			unset IFRAMES_DATA
+                    unset IFRAMES_DATA
 				done
 				echo "#EXT-X-ENDLIST" >> $iframe_playlist_name
 
