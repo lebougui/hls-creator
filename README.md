@@ -43,7 +43,7 @@ So to split a video file called *example.avi* into segments of 10 seconds, we'd 
 ```
     Mandatory Arguments:
 
-	-i [file]	Input file or UR
+	-i [file]	Input file or URL
 	-s [s]  	Segment length (seconds)
 
     Optional Arguments:
